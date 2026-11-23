@@ -1,0 +1,194 @@
+/* 站点级自定义样式。
+   单篇文章可通过 front matter 的 body_class 启用一套主题，例如：
+   body_class: "parchment-page" */
+
+$parchment-ink: #3f2d1b;
+$parchment-muted: #7a6142;
+
+/* ---------- 羊皮纸风格 ---------- */
+
+body.parchment-page {
+    background-color: #e9d8b5;
+    background-image:
+        radial-gradient(ellipse at 12% 8%, rgba(255, 255, 255, .5), transparent 55%),
+        radial-gradient(ellipse at 88% 92%, rgba(120, 85, 40, .12), transparent 60%);
+}
+
+body.parchment-page .main-article {
+    color: $parchment-ink;
+    font-family: "Songti SC", "STSong", "Noto Serif CJK SC", "Source Han Serif SC", "SimSun", Georgia, serif;
+    background-color: #f3e3c1;
+    background-image:
+        radial-gradient(circle at 18% 12%, rgba(120, 85, 40, .08), transparent 45%),
+        radial-gradient(circle at 82% 68%, rgba(120, 85, 40, .07), transparent 50%),
+        radial-gradient(circle at 45% 96%, rgba(90, 60, 25, .06), transparent 55%),
+        repeating-linear-gradient(112deg, rgba(110, 80, 40, .03) 0 1px, transparent 1px 7px);
+    border: 1px solid rgba(120, 85, 40, .28);
+    box-shadow:
+        inset 0 0 90px rgba(110, 70, 25, .22),
+        0 12px 34px rgba(70, 45, 15, .18);
+
+    .article-title,
+    .article-title a,
+    .article-subtitle,
+    h2, h3, h4 {
+        color: #2f2114;
+        font-family: inherit;
+        letter-spacing: .01em;
+    }
+
+    .article-meta,
+    .article-meta time,
+    .reading-time,
+    .article-category a {
+        color: $parchment-muted;
+    }
+
+    .article-content {
+        h1, h2, h3, h4, h5, h6 {
+            font-family: inherit;
+            color: #2f2114;
+        }
+
+        color: $parchment-ink;
+        font-size: 1.03em;
+        line-height: 1.95;
+
+        > p:first-of-type::first-letter {
+            float: left;
+            font-size: 3.1em;
+            line-height: .92;
+            padding: .06em .1em 0 0;
+            color: #6b3f1d;
+            font-weight: 700;
+        }
+
+        a {
+            color: #8a5a2b;
+            text-decoration-color: rgba(138, 90, 43, .45);
+        }
+
+        strong { color: #2f2114; }
+
+        blockquote {
+            background: rgba(120, 85, 40, .08);
+            border-left: 3px solid rgba(120, 85, 40, .4);
+            border-radius: 0 6px 6px 0;
+            color: #5b4327;
+        }
+
+        code {
+            background: rgba(120, 85, 40, .14);
+            color: #5a3d1f;
+        }
+
+        pre {
+            background: #efdfbe;
+            border: 1px solid rgba(120, 85, 40, .2);
+            box-shadow: none;
+        }
+
+        pre code {
+            background: transparent;
+            color: #4a3620;
+        }
+
+        hr { border-color: rgba(120, 85, 40, .3); }
+
+        figure figcaption {
+            color: $parchment-muted;
+            font-style: italic;
+        }
+
+        figure img { border-radius: 6px; }
+    }
+
+    .article-tags a {
+        background: rgba(120, 85, 40, .16);
+        color: #6b4a26;
+    }
+
+    .article-footer { border-top-color: rgba(120, 85, 40, .2); }
+}
+
+/* 深色模式下给羊皮纸一个暗色变体，避免刺眼 */
+[data-scheme="dark"] body.parchment-page {
+    background-color: #1b1712;
+
+    .main-article {
+        background-color: #2b241a;
+        background-image:
+            radial-gradient(circle at 20% 15%, rgba(255, 235, 200, .05), transparent 45%),
+            radial-gradient(circle at 80% 70%, rgba(255, 235, 200, .04), transparent 50%),
+            repeating-linear-gradient(112deg, rgba(255, 235, 200, .015) 0 1px, transparent 1px 7px);
+        border-color: rgba(200, 170, 120, .18);
+        box-shadow: inset 0 0 90px rgba(0, 0, 0, .5), 0 12px 34px rgba(0, 0, 0, .35);
+        color: #e6d8bd;
+
+        .article-title, .article-title a, h2, h3, h4 { color: #f0e3c8; }
+        .article-content, .article-content p { color: #e6d8bd; }
+
+        .article-content {
+            a { color: #d9a86c; }
+            strong { color: #f0e3c8; }
+            blockquote { background: rgba(255, 235, 200, .06); color: #cdbc9c; }
+            code { background: rgba(255, 235, 200, .1); color: #e9d8b5; }
+            pre { background: #221c15; border-color: rgba(200, 170, 120, .2); }
+            pre code { color: #e2d3b4; }
+        }
+
+        .article-tags a { background: rgba(255, 235, 200, .12); color: #e6d8bd; }
+    }
+
+    .left-sidebar,
+    .right-sidebar .widget,
+    .right-sidebar .widget--toc {
+        background-color: #2b241a;
+        color: #e6d8bd;
+        box-shadow: 0 0 10px rgba(0, 0, 0, .35);
+    }
+
+    .left-sidebar a,
+    .left-sidebar .site-name,
+    .left-sidebar .site-description,
+    .right-sidebar .widget-title,
+    .right-sidebar .widget--toc .widget-title,
+    .right-sidebar .widget--toc .toc--menu a {
+        color: #cdbc9c;
+    }
+
+    .left-sidebar .site-name { color: #f0e3c8; }
+}
+
+[data-scheme="light"] body.parchment-page {
+    .article-category a {
+        background-color: rgba(120, 85, 40, .2) !important;
+        color: #5b3f22 !important;
+    }
+
+    .left-sidebar,
+    .right-sidebar .widget,
+    .right-sidebar .widget--toc {
+        background-color: #f7ecd6;
+        color: $parchment-ink;
+        box-shadow: 0 0 10px rgba(120, 85, 40, .07);
+    }
+
+    .left-sidebar a,
+    .left-sidebar .site-name,
+    .left-sidebar .site-description,
+    .right-sidebar .widget-title,
+    .widget--toc .toc--menu a {
+        color: $parchment-muted;
+    }
+
+    .left-sidebar .site-name { color: #2f2114; }
+
+    .right-sidebar .widget--toc .widget-title,
+    .right-sidebar .widget--toc .toc--menu a { color: $parchment-muted; }
+}
+
+[data-scheme="dark"] body.parchment-page .article-category a {
+    background-color: rgba(255, 235, 200, .15) !important;
+    color: #e6d8bd !important;
+}
