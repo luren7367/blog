@@ -1,0 +1,15 @@
+baseURL = 'https://luren7367.github.io/'
+title = '路人的博客'
+theme = 'hugo-theme-stack'
+
+# 中文站点
+defaultContentLanguage = 'zh'
+hasCJKLanguage = true
+locale = 'zh-cn'
+
+[pagination]
+  pagerSize = 10
+
+[permalinks]
+  post = '/p/:slug/'
+  page = '/:slug/'
