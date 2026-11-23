@@ -8,7 +8,7 @@ hasCJKLanguage = true
 locale = 'zh-cn'
 
 [pagination]
-  pagerSize = 10
+  pagerSize = 5
 
 [permalinks]
   post = '/p/:slug/'

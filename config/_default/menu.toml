@@ -2,16 +2,25 @@
     identifier = "home"
     name       = "首页"
     url        = "/"
-    weight     = 1
+    weight     = -100
 
     [main.params]
         icon = "home"
 
 [[main]]
+    identifier = "archives"
+    name       = "归档"
+    url        = "/archives/"
+    weight     = -90
+
+    [main.params]
+        icon = "archives"
+
+[[main]]
     identifier = "tags"
     name       = "标签"
     url        = "/tags/"
-    weight     = 2
+    weight     = -80
 
     [main.params]
         icon = "tag"
@@ -20,7 +29,25 @@
     identifier = "categories"
     name       = "分类"
     url        = "/categories/"
-    weight     = 3
+    weight     = -70
 
     [main.params]
         icon = "categories"
+
+[[main]]
+    identifier = "about"
+    name       = "关于"
+    url        = "/about/"
+    weight     = -60
+
+    [main.params]
+        icon = "user"
+
+[[main]]
+    identifier = "search"
+    name       = "搜索"
+    url        = "/search/"
+    weight     = -50
+
+    [main.params]
+        icon = "search"

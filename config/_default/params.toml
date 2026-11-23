@@ -1,10 +1,18 @@
 # Stack 主题站点级参数（未列出的项沿用主题默认值）
 
 [sidebar]
-    compact = false
-    emoji   = ""
+    compact  = false
+    emoji    = ""
+    subtitle = "记录学习、生活与一些随笔"
 
 [widgets]
+    # 首页右侧栏：搜索、归档、分类、标签云（与主题 demo 一致）
+    homepage = [
+        { type = "search" },
+        { type = "archives", params = { limit = 5 } },
+        { type = "categories", params = { limit = 10 } },
+        { type = "tag-cloud", params = { limit = 10 } },
+    ]
     # 文章页右侧栏：目录
     page = [
         { type = "toc" },
@@ -13,6 +21,9 @@
 [article]
     readingTime = true
     toc         = true
+
+[comments]
+    enabled = false
 
 [footer]
     since = 2026
