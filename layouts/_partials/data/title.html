@@ -1,0 +1,18 @@
+{{/* 站点级覆盖：404 页面标题中文化（其余逻辑与主题 data/title.html 一致） */}}
+{{- $pageTitle := .Title -}}
+{{- $siteTitle := .Site.Title -}}
+{{- $paginator := partial "helper/paginator.html" . -}}
+
+{{- $title := slice -}}
+
+{{- if eq .Kind "404" -}}
+    {{- $pageTitle = "页面不存在" -}}
+{{- end -}}
+
+{{- if and $paginator $paginator.HasPrev -}}
+    {{ $title = $title | append (printf "第 %d 页" $paginator.PageNumber) }}
+{{- end -}}
+
+{{- $title = $title | append (default $siteTitle $pageTitle) -}}
+
+{{ return delimit $title " - " }}
