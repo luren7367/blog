@@ -3,7 +3,6 @@ title: "摩根·拉迪莫尔：暮色森林的悲鸣"
 slug: "morgan-ladimore"
 description: "暮色森林里游荡的摩拉迪姆，曾经是一位伟大而高尚的骑士。"
 image: "cover.jpg"
-body_class: "parchment-page"
 date: 2026-11-23
 tags:
     - 魔兽世界剧情
