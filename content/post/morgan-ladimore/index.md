@@ -7,6 +7,7 @@ body_class: "parchment-page"
 date: 2026-11-23
 tags:
     - 魔兽世界剧情
+    - 游戏剧情
 categories:
     - 游戏
 ---
@@ -56,8 +57,6 @@ categories:
 > 莉丝·拉迪莫尔
 > 我们深爱着的妻子与母亲
 
-{{< figure src="grave.jpg" caption="雾中的墓地。图：W.carter / Wikimedia Commons，CC BY-SA 4.0" >}}
-
 ## 六、崩溃
 
 摩根的忧虑立刻变成了沮丧，又变成了无比的悲痛。他瘫在地上哭泣，一连几个小时望着墓碑，一边哭，一边对着墓碑请求原谅和宽恕。
@@ -86,4 +85,4 @@ categories:
 
 *本文内容整理自《魔兽世界》中“摩根·拉迪莫尔的故事”相关剧情文本。*
 
-*配图：题图“Moody, foggy black forest”by F R，公有领域；墓地照片 by W.carter，CC BY-SA 4.0，均来自 Wikimedia Commons。*
+*配图：《魔兽世界》游戏截图，画面为暮色森林中的摩拉迪姆（© Blizzard Entertainment）。*
