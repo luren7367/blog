@@ -527,6 +527,3 @@ docker compose up -d
 - **定期清理磁盘。** 镜像和构建缓存会越攒越多，隔段时间 `docker system df` 看看，`docker image prune`、`docker builder prune` 清一清。
 - **不要图省事加 `--privileged`。** 需要什么设备就直通什么设备，最小权限比“全开”省心得多。
 
----
-
-这套东西跑下来，最大的感受是：**容器不是为了显得专业，而是为了让“重装一次”这件事变得不痛苦。** 哪天小主机坏了，换台机器，装个 Docker，把目录和 compose 拷过去，十分钟就能恢复。
