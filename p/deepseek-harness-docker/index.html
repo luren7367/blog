@@ -1,0 +1,552 @@
+<!doctype html><html lang=zh-CN dir=ltr><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><meta name=description content="从装 Docker、拉源码，到写 Dockerfile 和 compose，把 DSH 跑在自己的小主机上，再用 nginx 加一层密码。"><title>把 DeepSeek Harness 装进个人服务器的 Docker 里</title><link rel=canonical href=https://luren7367.github.io/blog/p/deepseek-harness-docker/><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link rel=preload as=style href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap"><link rel=stylesheet href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap"><link rel=stylesheet href=/blog/scss/style.min.5eeed3bbaeb4bc85027a64fc555ed50f27122544390aa8145a91799e6b8f5bfe.css><meta property='og:title' content="把 DeepSeek Harness 装进个人服务器的 Docker 里"><meta property='og:description' content="从装 Docker、拉源码，到写 Dockerfile 和 compose，把 DSH 跑在自己的小主机上，再用 nginx 加一层密码。"><meta property='og:url' content='https://luren7367.github.io/blog/p/deepseek-harness-docker/'><meta property='og:site_name' content='路人的博客'><meta property='og:type' content='article'><meta property='article:section' content='Post'><meta property='article:tag' content='Docker'><meta property='article:tag' content='自建服务'><meta property='article:tag' content='DeepSeek'><meta property='article:published_time' content='2026-11-25T00:00:00+00:00'><meta property='article:modified_time' content='2026-11-25T00:00:00+00:00'><meta property='og:image' content='https://luren7367.github.io/blog/p/deepseek-harness-docker/cover.png'><meta name=twitter:title content="把 DeepSeek Harness 装进个人服务器的 Docker 里"><meta name=twitter:description content="从装 Docker、拉源码，到写 Dockerfile 和 compose，把 DSH 跑在自己的小主机上，再用 nginx 加一层密码。"><meta name=twitter:card content="summary_large_image"><meta name=twitter:image content='https://luren7367.github.io/blog/p/deepseek-harness-docker/cover.png'></head><body class=article-page><script>(function(){const e="StackColorScheme";localStorage.getItem(e)||localStorage.setItem(e,"auto")})()</script><script>(function(){const t="StackColorScheme",e=localStorage.getItem(t),n=window.matchMedia("(prefers-color-scheme: dark)").matches===!0;e=="dark"||e==="auto"&&n?document.documentElement.dataset.scheme="dark":document.documentElement.dataset.scheme="light"})()</script><div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky"><button class="hamburger hamburger--spin" type=button id=toggle-menu aria-label=切换菜单>
+<span class=hamburger-box><span class=hamburger-inner></span></span></button><header><div class=site-meta><h1 class=site-name><a href=/blog/>路人的博客</a></h1><h2 class=site-description>记录学习、生活与一些随笔</h2></div></header><ol class=menu id=main-menu><li><a href=/blog/><svg class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/></svg>
+<span>首页</span></a></li><li><a href=/blog/archives/><svg class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><rect x="3" y="4" width="18" height="4" rx="2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+<span>归档</span></a></li><li><a href=/blog/tags/><svg class="icon icon-tabler icon-tabler-tag" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11 3l9 9a1.5 1.5.0 010 2l-6 6a1.5 1.5.0 01-2 0L3 11V7a4 4 0 014-4h4"/><circle cx="9" cy="9" r="2"/></svg>
+<span>标签</span></a></li><li><a href=/blog/categories/><svg class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg>
+<span>分类</span></a></li><li><a href=/blog/about/><svg class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg>
+<span>关于</span></a></li><li><a href=/blog/search/><svg class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg>
+<span>搜索</span></a></li><li class=menu-bottom-section><ol class=menu><li id=dark-mode-toggle><svg class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="8" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<svg class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="16" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<span>暗色模式</span></li></ol></li></ol></aside><main class="main full-width"><article class="has-image main-article"><header class=article-header><div class=article-image><a href=/blog/p/deepseek-harness-docker/><img alt="Featured image of post 把 DeepSeek Harness 装进个人服务器的 Docker 里" height=630 loading=lazy sizes="(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px" src=/blog/p/deepseek-harness-docker/cover.png srcset="/blog/p/deepseek-harness-docker/cover_hu_3a6c0aa652223834.png 800w, /blog/p/deepseek-harness-docker/cover.png 1200w" width=1200></a></div><div class=article-details><header class=article-category><a href=/blog/categories/%E6%8A%80%E6%9C%AF/ style=background-color:#beefd9;color:#0f3d29>技术</a></header><div class=article-title-wrapper><h2 class=article-title><a href=/blog/p/deepseek-harness-docker/>把 DeepSeek Harness 装进个人服务器的 Docker 里</a></h2><h3 class=article-subtitle>从装 Docker、拉源码，到写 Dockerfile 和 compose，把 DSH 跑在自己的小主机上，再用 nginx 加一层密码。</h3></div><footer class=article-meta><div class=inline-meta><svg class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11.795 21H5a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v4"/><circle cx="18" cy="18" r="4"/><path d="M15 3v4"/><path d="M7 3v4"/><path d="M3 11h16"/><path d="M18 16.496V18l1 1"/></svg>
+<time class=article-time--published datetime=2026-11-25T00:00:00Z>2026年11月25日星期三</time>
+<svg class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+<time class=article-time--reading>阅读时长: 11 分钟</time></div></footer></div></header><section class=article-content><p>前阵子把 DeepSeek Harness（下面简称 DSH）搬到了家里那台小主机上。它本来可以直接 <code>pnpm</code> 跑在宿主机上，但我还是选择塞进 Docker。</p><p>这篇把整个过程完整记一遍：为什么用 Docker、怎么装、源码怎么拉、Dockerfile 和 compose 怎么写、启动时要注意什么，以及以后怎么更新。</p><h2 id=一装进-docker-的好处>一、装进 Docker 的好处</h2><p><strong>1. 兼顾轻便与良好的隔离性。</strong> 容器里可以放心开“完全模式”，搞坏了也不慌：一条命令删掉旧实例，再一条命令创建新的，配置和数据都留在挂载目录里，宿主机不受影响。</p><p><strong>2. 服务器可以 24 小时不关机。</strong> 需要长时间运行的任务，放在小主机上比一直开着主力电脑更省电，也更省心。</p><p><strong>3. 不污染宿主机。</strong> 主程序、各种插件和对应的系统依赖全部打包进镜像，宿主机始终保持干净。</p><p><strong>4. 迁移方便。</strong> 镜像和 compose 文件拷到新机器上马上就能跑，不会出现“A 机能跑、B 机不行”的情况。</p><p><strong>5. 回滚成本低。</strong> 每次重新构建都用不同的镜像 tag；新版本用出问题，compose 里改一行 tag、重新 <code>up -d</code>，就回到旧版本。直接装在宿主机上可没这么干脆。</p><p><strong>6. 和别的服务好相处。</strong> 我这台机器上还跑着几个容器，也可以跑小龙虾之类的其他 agent 程序，不用担心彼此冲突。</p><h2 id=二准备环境>二、准备环境</h2><p>一台能当个人服务器用的小主机就行：N100 之类的四核小机器，4GB 内存、32GB 以上的 SSD，装 Debian 13，能 SSH 登录、有 sudo 权限，就够跑了。</p><p>如果你打算让它处理音视频，最好选带核显的机器——后面可以把 <code>/dev/dri/renderD128</code> 直通给容器，ffmpeg 转码会快很多。没有核显也能转码，只是会慢不少。</p><p>Debian 13 的安装过程这里就不展开了，装好系统、能联网、能 sudo 就行。</p><h2 id=三用官方-apt-仓库安装-docker>三、用官方 apt 仓库安装 Docker</h2><p>Debian 自己的源里有个 <code>docker.io</code>，但版本偏旧，而且不带 compose 插件。更推荐加 Docker 官方的 apt 仓库：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl><span class=c1># 1. 基础工具</span>
+</span></span><span class=line><span class=cl>sudo apt update
+</span></span><span class=line><span class=cl>sudo apt install -y ca-certificates curl
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 2. 添加官方 GPG 公钥</span>
+</span></span><span class=line><span class=cl>sudo install -m <span class=m>0755</span> -d /etc/apt/keyrings
+</span></span><span class=line><span class=cl>sudo curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc
+</span></span><span class=line><span class=cl>sudo chmod a+r /etc/apt/keyrings/docker.asc
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 3. 添加软件源（Debian 13 的代号是 trixie）</span>
+</span></span><span class=line><span class=cl><span class=nb>echo</span> <span class=s2>&#34;deb [arch=</span><span class=k>$(</span>dpkg --print-architecture<span class=k>)</span><span class=s2> signed-by=/etc/apt/keyrings/docker.asc] \
+</span></span></span><span class=line><span class=cl><span class=s2>https://download.docker.com/linux/debian trixie stable&#34;</span> <span class=p>|</span> <span class=se>\
+</span></span></span><span class=line><span class=cl>sudo tee /etc/apt/sources.list.d/docker.list
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 4. 安装</span>
+</span></span><span class=line><span class=cl>sudo apt update
+</span></span><span class=line><span class=cl>sudo apt install -y docker-ce docker-ce-cli containerd.io <span class=se>\
+</span></span></span><span class=line><span class=cl>  docker-buildx-plugin docker-compose-plugin
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 5. 开机自启</span>
+</span></span><span class=line><span class=cl>sudo systemctl <span class=nb>enable</span> --now docker
+</span></span></code></pre></td></tr></table></div></div><p>装完跑一句验证：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>sudo docker run --rm hello-world
+</span></span></code></pre></td></tr></table></div></div><p>看到那句 “Hello from Docker!” 就成了。</p><p><strong>6. 可选但推荐：把当前用户加入 docker 组</strong>，这样以后运行 docker 命令就不用每次都加 sudo：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl><span class=c1># 创建 docker 组（一般已存在，提示已存在可忽略）</span>
+</span></span><span class=line><span class=cl>sudo groupadd docker
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 把当前用户加入 docker 组</span>
+</span></span><span class=line><span class=cl>sudo usermod -aG docker <span class=nv>$USER</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 让当前 shell 立即生效；或者注销重新登录</span>
+</span></span><span class=line><span class=cl>newgrp docker
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 验证：不再需要 sudo 也能跑</span>
+</span></span><span class=line><span class=cl>docker run --rm hello-world
+</span></span></code></pre></td></tr></table></div></div><p>需要提醒的是，<strong>docker 组的权限基本等同于 root</strong>（能挂载宿主机目录、能操作所有容器），只把自己信任的账号加进去。</p><p>这种方式的好处：版本跟官方同步、升级走 <code>apt upgrade</code> 就行；仓库有签名校验；<code>docker compose</code> 和 <code>docker buildx</code> 作为插件一起装好，不用再单独折腾 compose 的二进制文件；哪天不想用了，<code>apt purge</code> 删得也干净。</p><h2 id=四拉取源码>四、拉取源码</h2><p>先创建一个目录，专门存放容器相关的文件：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>mkdir deepseek-harness-docker
+</span></span><span class=line><span class=cl><span class=nb>cd</span> deepseek-harness-docker
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>git clone https://github.com/deepseek-ai/deepseek-harness.git
+</span></span></code></pre></td></tr></table></div></div><p>这会把 <code>deepseek-harness</code> 源码项目克隆到当前目录下。执行完，目录结构应该是：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>deepseek-harness-docker/
+</span></span><span class=line><span class=cl>└── deepseek-harness/     # 源码
+</span></span></code></pre></td></tr></table></div></div><p>目录名可以随便起，比如 <code>mkdir aaa</code>，自己记得住就行。</p><h2 id=五写-dockerfile把源码变成镜像>五、写 Dockerfile，把源码变成镜像</h2><p>在 <code>deepseek-harness-docker</code> 目录下创建名为 <code>Dockerfile</code> 的文件：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>vi Dockerfile
+</span></span></code></pre></td></tr></table></div></div><p>文件名必须是 <code>Dockerfile</code>，否则 docker 引擎不认识。</p><p>写入以下内容：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-dockerfile data-lang=dockerfile><span class=line><span class=cl><span class=c># 基础镜像：Debian 12 + Node.js 22，自带 corepack</span><span class=err>
+</span></span></span><span class=line><span class=cl><span class=k>FROM</span><span class=w> </span><span class=s>node:22-bookworm</span><span class=err>
+</span></span></span><span class=line><span class=cl><span class=err>
+</span></span></span><span class=line><span class=cl><span class=c># 复制源码</span><span class=err>
+</span></span></span><span class=line><span class=cl><span class=k>COPY</span> ./deepseek-harness /deepseek-harness<span class=err>
+</span></span></span><span class=line><span class=cl><span class=err>
+</span></span></span><span class=line><span class=cl><span class=c># 把镜像里的工作目录切换到 /deepseek-harness</span><span class=err>
+</span></span></span><span class=line><span class=cl><span class=k>WORKDIR</span><span class=w> </span><span class=s>/deepseek-harness</span><span class=err>
+</span></span></span><span class=line><span class=cl><span class=err>
+</span></span></span><span class=line><span class=cl><span class=c># 安装所需的系统依赖</span><span class=err>
+</span></span></span><span class=line><span class=cl><span class=k>RUN</span> apt-get update <span class=se>\
+</span></span></span><span class=line><span class=cl>    <span class=o>&amp;&amp;</span> apt-get install -y --no-install-recommends <span class=se>\
+</span></span></span><span class=line><span class=cl>    bubblewrap <span class=se>\
+</span></span></span><span class=line><span class=cl>    ffmpeg <span class=se>\
+</span></span></span><span class=line><span class=cl>    i965-va-driver <span class=se>\
+</span></span></span><span class=line><span class=cl>    vainfo <span class=se>\
+</span></span></span><span class=line><span class=cl>    build-essential <span class=se>\
+</span></span></span><span class=line><span class=cl>    python3 <span class=se>\
+</span></span></span><span class=line><span class=cl>    python3-dev <span class=se>\
+</span></span></span><span class=line><span class=cl>    git <span class=se>\
+</span></span></span><span class=line><span class=cl>    ca-certificates <span class=se>\
+</span></span></span><span class=line><span class=cl>    <span class=o>&amp;&amp;</span> rm -rf /var/lib/apt/lists/*<span class=err>
+</span></span></span><span class=line><span class=cl><span class=err>
+</span></span></span><span class=line><span class=cl><span class=c># 启用 Corepack，使用仓库锁定的 pnpm 版本</span><span class=err>
+</span></span></span><span class=line><span class=cl><span class=k>RUN</span> corepack enable<span class=err>
+</span></span></span><span class=line><span class=cl><span class=err>
+</span></span></span><span class=line><span class=cl><span class=c># 安装项目依赖</span><span class=err>
+</span></span></span><span class=line><span class=cl><span class=k>RUN</span> pnpm install --frozen-lockfile<span class=err>
+</span></span></span><span class=line><span class=cl><span class=err>
+</span></span></span><span class=line><span class=cl><span class=c># 编译</span><span class=err>
+</span></span></span><span class=line><span class=cl><span class=k>RUN</span> pnpm run build<span class=err>
+</span></span></span><span class=line><span class=cl><span class=err>
+</span></span></span><span class=line><span class=cl><span class=c># 声明 Web UI 监听的端口（只是声明，映射在 compose 里做）</span><span class=err>
+</span></span></span><span class=line><span class=cl><span class=k>EXPOSE</span><span class=w> </span><span class=s>3080</span><span class=err>
+</span></span></span><span class=line><span class=cl><span class=err>
+</span></span></span><span class=line><span class=cl><span class=c># 启动 dsh web；--no-open 避免容器里尝试打开浏览器</span><span class=err>
+</span></span></span><span class=line><span class=cl><span class=k>CMD</span> <span class=p>[</span><span class=s2>&#34;pnpm&#34;</span><span class=p>,</span> <span class=s2>&#34;dsh&#34;</span><span class=p>,</span> <span class=s2>&#34;web&#34;</span><span class=p>,</span> <span class=s2>&#34;--no-open&#34;</span><span class=p>]</span><span class=err>
+</span></span></span></code></pre></td></tr></table></div></div><p>逐行解释一下：</p><ul><li><code>FROM node:22-bookworm</code>：指定基础镜像。<strong>Dockerfile 必须以 <code>FROM</code> 开头</strong>，否则构建直接报错。这里选 Debian 12 的 Node 22 镜像，是因为后面要用 <code>apt-get</code> 装系统依赖；Node 镜像自带 corepack，正好用来锁 pnpm 版本。</li><li><code>COPY ./deepseek-harness /deepseek-harness</code>：把构建上下文里的 <code>deepseek-harness</code> 文件夹复制到镜像根目录下的 <code>/deepseek-harness</code>。</li><li><code>WORKDIR /deepseek-harness</code>：把镜像里的工作目录切过去，后面的 <code>RUN</code>、<code>CMD</code> 都相当于在这个目录下执行。</li><li><code>RUN apt-get update && apt-get install ...</code>：装系统依赖。<ul><li><code>bubblewrap</code>：给工具执行套一层轻量沙箱；</li><li><code>ffmpeg</code>：音视频的剪辑、转码、抽帧都靠它；</li><li><code>i965-va-driver</code>、<code>vainfo</code>：Intel 核显的 VA-API 驱动和检测工具，配合后面的设备直通做硬解；</li><li><code>build-essential</code>：编译原生模块要用的 gcc、make；</li><li><code>python3</code>、<code>python3-dev</code>：部分工具链和原生扩展需要；</li><li><code>git</code>、<code>ca-certificates</code>：拉依赖、校验 HTTPS 证书；</li><li><code>--no-install-recommends</code> 不装推荐包，<code>rm -rf /var/lib/apt/lists/*</code> 清理 apt 缓存，都是为了让镜像小一点。</li></ul></li><li><code>RUN corepack enable</code>：打开 Node 自带的包管理器代理，让它按 <code>package.json</code> 里声明的 <code>packageManager</code> 使用对应版本的 pnpm。</li><li><code>RUN pnpm install --frozen-lockfile</code>：严格按 <code>pnpm-lock.yaml</code> 安装依赖。lock 文件和 <code>package.json</code> 对不上会直接报错，换来的是每次都一致的依赖。</li><li><code>RUN pnpm run build</code>：执行项目定义的构建脚本，把前端和服务端编译成可运行的产物。</li><li><code>EXPOSE 3080</code>：声明容器里的 Web 服务监听 3080 端口，只是说明性信息，去掉也不影响运行。</li><li><code>CMD ["pnpm", "dsh", "web", "--no-open"]</code>：容器启动时执行的命令。写成 JSON 数组（exec 形式），<code>dsh</code> 会成为容器里的 1 号进程，能正确收到停止信号；<code>--no-open</code> 是因为容器里没有浏览器。</li></ul><p>注意：<strong>Dockerfile 的注释必须单独占一行</strong>。如果写成 <code>COPY ./deepseek-harness /deepseek-harness # 复制源码</code>，<code>#</code> 后面的内容会被当成参数，构建直接失败。</p><p>构建镜像：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>docker build -t deepseek-harness:1.1.1 .
+</span></span></code></pre></td></tr></table></div></div><ul><li><code>-t</code> 是打标签：<code>deepseek-harness</code> 是镜像名，<code>1.1.1</code> 是版本号。建议固定版本号，别用 <code>latest</code>，回滚的时候会感谢自己。</li><li>最后那个 <code>.</code> 表示以当前目录作为构建上下文，因为源码文件夹和 Dockerfile 都在这里。</li></ul><h2 id=六写-compose-文件>六、写 compose 文件</h2><p>先用一条命令创建一个 bridge 网络：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>docker network create --subnet<span class=o>=</span>172.24.0.0/16 aigent-a
+</span></span></code></pre></td></tr></table></div></div><p><code>--subnet=172.24.0.0/16</code> 指定网段，不写的话 docker 会自动分配。网络名也可以换，自己记得就行。</p><p>然后在 <code>deepseek-harness-docker</code> 目录下创建 <code>compose.yml</code>：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>vi compose.yml
+</span></span></code></pre></td></tr></table></div></div><p>写入：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span><span class=lnt>45
+</span><span class=lnt>46
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-yaml data-lang=yaml><span class=line><span class=cl><span class=nt>services</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=c># 服务名：搭配 nginx 使用</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>nginx-dsh</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=c># 镜像名</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>image</span><span class=p>:</span><span class=w> </span><span class=s1>&#39;nginx:alpine&#39;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=c># 实例的名字</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>container_name</span><span class=p>:</span><span class=w> </span><span class=l>nginx-dsh</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=c># 是否自动重启</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>restart</span><span class=p>:</span><span class=w> </span><span class=l>unless-stopped</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=c># 环境变量</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>environment</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=nt>TZ</span><span class=p>:</span><span class=w> </span><span class=s2>&#34;Asia/Shanghai&#34;</span><span class=w>   </span><span class=c># 容器内使用上海时区</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=c># 加入 aigent-a 网络</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>networks</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>aigent-a</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=c># 把容器里的 30800 端口映射到宿主机 30800（DNAT）</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>ports</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=s2>&#34;30800:30800&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=c># 挂载 nginx 配置与密码文件（:ro 表示只读）</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>volumes</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>./nginx.conf:/etc/nginx/nginx.conf:ro</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>./htpasswd:/etc/nginx/.htpasswd:ro</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=c># 大意是：deepseek-harness 这个容器启动了，再启动本容器</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>depends_on</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>deepseek-harness</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>deepseek-harness</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>container_name</span><span class=p>:</span><span class=w> </span><span class=l>deepseek-harness</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>image</span><span class=p>:</span><span class=w> </span><span class=s1>&#39;deepseek-harness:1.1.1&#39;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>restart</span><span class=p>:</span><span class=w> </span><span class=l>unless-stopped</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=c># 直通核显，供 ffmpeg 硬解</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>devices</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>/dev/dri/renderD128:/dev/dri/renderD128</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>environment</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=nt>TZ</span><span class=p>:</span><span class=w> </span><span class=s2>&#34;Asia/Shanghai&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>networks</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=nt>aigent-a</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=nt>ipv4_address</span><span class=p>:</span><span class=w> </span><span class=m>172.24.0.10</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>volumes</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>./dsh:/root/.dsh</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=c># 声明 aigent-a 是已经存在的网络，创建容器时不会重复创建</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nt>networks</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>aigent-a</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>external</span><span class=p>:</span><span class=w> </span><span class=kc>true</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>几个关键点：</p><ul><li><code>networks</code> 里给 <code>deepseek-harness</code> 指定了固定 IP <code>172.24.0.10</code>，nginx 反代时直接写这个地址即可。如果创建网络时没加 <code>--subnet=172.24.0.0/16</code>，网段不一定是 <code>172.24.0.0/16</code>，这个地址就要跟着改。</li><li><code>ports</code> 只映射 nginx 的 30800，<strong>DSH 的 3080 不对外</strong>，外部只能通过加了密码的入口访问。</li><li><code>depends_on</code> 只管启动顺序，不代表 DSH 真的已经就绪。</li></ul><h3 id=关于-volumes为什么数据挂载出来就丢不了>关于 volumes：为什么数据挂载出来就丢不了</h3><p>容器销毁后，它运行时产生的文件会一起消失。所以需要用 <code>volumes</code> 把要保留的数据映射到宿主机目录上，容器重建后还能接着用。</p><p>DSH 启动后会在当前用户的主目录下创建 <code>.dsh</code> 文件夹，用来放会话缓存、插件文件等。我们的镜像没有切换用户，基础镜像默认以 root 运行，所以它对应的是容器里的 <code>/root/.dsh</code>。</p><p>因此 compose 里写了：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-yaml data-lang=yaml><span class=line><span class=cl><span class=w>    </span><span class=nt>volumes</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>./dsh:/root/.dsh</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>意思是把宿主机上的 <code>./dsh</code> 挂到容器的 <code>/root/.dsh</code>。这样只要备份宿主机的 <code>./dsh</code> 文件夹，就相当于备份了 DSH 的会话和插件数据。</p><p>有的插件会把配置放在 <code>/root/.config</code> 下，需要的话也按同样方式挂载。也可以图省事把整个 <code>/root</code> 挂出来，比如 <code>/aaaa/root:/root</code>：</p><ul><li>注意<strong>别把宿主机自己的 <code>/root</code> 挂进去</strong>；</li><li>挂载默认以宿主机为准，第一次启动时宿主机目录是空的，容器里的 <code>/root</code> 也会跟着变空。如果基础镜像里的系统依赖 <code>/root</code> 下的某些默认文件，就可能出问题。目前的实际使用中没有遇到，但这属于需要知道的风险。</li></ul><p>其他 <code>volumes</code> 也都可以按需增减。</p><h3 id=nginx-配置>nginx 配置</h3><p><code>compose.yml</code> 里引用的 <code>./nginx.conf</code> 内容如下：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span><span class=lnt>45
+</span><span class=lnt>46
+</span><span class=lnt>47
+</span><span class=lnt>48
+</span><span class=lnt>49
+</span><span class=lnt>50
+</span><span class=lnt>51
+</span><span class=lnt>52
+</span><span class=lnt>53
+</span><span class=lnt>54
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-nginx data-lang=nginx><span class=line><span class=cl><span class=c1># 全局配置：仅保留必要的事件和 HTTP 块
+</span></span></span><span class=line><span class=cl><span class=k>events</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=kn>worker_connections</span> <span class=mi>1024</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>http</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=c1># 隐藏 Nginx 版本号，减少信息暴露
+</span></span></span><span class=line><span class=cl>    <span class=kn>server_tokens</span> <span class=no>off</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1># WebSocket 升级头的映射
+</span></span></span><span class=line><span class=cl>    <span class=kn>map</span> <span class=nv>$http_upgrade</span> <span class=nv>$connection_upgrade</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=kn>default</span> <span class=s>upgrade</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=kn>&#39;&#39;</span>      <span class=s>close</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=kn>server</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=kn>listen</span> <span class=mi>30800</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=kn>server_name</span> <span class=s>_</span><span class=p>;</span>   <span class=c1># 如果使用域名，替换为实际域名
+</span></span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=c1># ===== Basic Auth 认证 =====
+</span></span></span><span class=line><span class=cl>        <span class=kn>auth_basic</span>           <span class=s>&#34;Restricted&#34;</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=kn>auth_basic_user_file</span> <span class=s>/etc/nginx/.htpasswd</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=kn>location</span> <span class=s>/</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=c1># 转发到 dsh 容器
+</span></span></span><span class=line><span class=cl>            <span class=kn>proxy_pass</span> <span class=s>http://172.24.0.10:3080</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=c1># WebSocket 必须用 HTTP/1.1 并透传 Upgrade/Connection
+</span></span></span><span class=line><span class=cl>            <span class=kn>proxy_http_version</span> <span class=mi>1</span><span class=s>.1</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=kn>proxy_set_header</span> <span class=s>Upgrade</span>    <span class=nv>$http_upgrade</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=kn>proxy_set_header</span> <span class=s>Connection</span> <span class=nv>$connection_upgrade</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=c1># 保留原始 Host 与 Origin，dsh 的 trustedHosts 需要精确匹配
+</span></span></span><span class=line><span class=cl>            <span class=kn>proxy_set_header</span> <span class=s>Host</span>              <span class=n>172.24.0.10</span><span class=p>:</span><span class=mi>3080</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=kn>proxy_set_header</span> <span class=s>Origin</span>            <span class=s>http://172.24.0.10:3080</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=kn>proxy_set_header</span> <span class=s>X-Real-IP</span>         <span class=nv>$remote_addr</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=kn>proxy_set_header</span> <span class=s>X-Forwarded-For</span>   <span class=nv>$proxy_add_x_forwarded_for</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=kn>proxy_set_header</span> <span class=s>X-Forwarded-Proto</span> <span class=nv>$scheme</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=c1># ===== SSE / 流式输出优化 =====
+</span></span></span><span class=line><span class=cl>            <span class=c1># 必须关闭缓冲和缓存，否则对话会“卡住”或延迟数秒才显示
+</span></span></span><span class=line><span class=cl>            <span class=kn>proxy_buffering</span> <span class=no>off</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=kn>proxy_cache</span> <span class=no>off</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=kn>proxy_request_buffering</span> <span class=no>off</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=kn>chunked_transfer_encoding</span> <span class=no>on</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=c1># dsh 可能执行长时间任务，超时设长一点
+</span></span></span><span class=line><span class=cl>            <span class=kn>proxy_read_timeout</span>  <span class=s>3600s</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=kn>proxy_send_timeout</span>  <span class=s>3600s</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>            <span class=kn>proxy_connect_timeout</span> <span class=s>30s</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><p>注意核对里面的 <code>172.24.0.10:3080</code> 和你实际的容器 IP、端口是否一致。</p><h3 id=htpasswd账号密码文件长什么样>htpasswd：账号密码文件长什么样</h3><p><code>htpasswd</code> 是 nginx 做 Basic Auth 用的账号文件，格式很简单，每行一个用户：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>用户名:密码哈希
+</span></span></code></pre></td></tr></table></div></div><p>例如：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-text data-lang=text><span class=line><span class=cl>luren:$apr1$m7Q2b9xT$8s0mX1kPq7yLz4rV6nB2c0
+</span></span></code></pre></td></tr></table></div></div><p>冒号前的 <code>luren</code> 是用户名，冒号后那一长串是<strong>加盐后的密码哈希</strong>，不是明文。<code>$apr1$</code> 表示使用的是 Apache 的 MD5 变体（apr1）；常见的还有：</p><ul><li><code>$2y$...</code>：bcrypt，安全性更好，推荐；</li><li><code>{SHA}...</code>：SHA-1 摘要（Base64 编码），比较旧；</li><li>明文（不推荐，几乎没人用）。</li></ul><p>nginx 的 <code>auth_basic_user_file</code> 支持 crypt、apr1、SHA-1 和 bcrypt 几种格式。</p><p>生成文件最省事的办法是用 <code>htpasswd</code> 命令（Debian 上装在 <code>apache2-utils</code> 里）：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl><span class=c1># 安装工具</span>
+</span></span><span class=line><span class=cl>sudo apt install -y apache2-utils
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 交互式输入密码，创建（或覆盖）文件</span>
+</span></span><span class=line><span class=cl>htpasswd -c ./htpasswd luren
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 之后再加用户就不要带 -c 了，否则会清空原文件</span>
+</span></span><span class=line><span class=cl>htpasswd ./htpasswd zhangsan
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 也可以在命令行里直接给密码（注意会留在 shell 历史里）</span>
+</span></span><span class=line><span class=cl>htpasswd -b ./htpasswd luren <span class=s1>&#39;MyStrongPass&#39;</span>
+</span></span></code></pre></td></tr></table></div></div><p>几点注意：</p><ul><li>用 <code>-c</code> 会<strong>新建并覆盖</strong>文件，第二个用户开始就别再加 <code>-c</code>。</li><li>哈希每次生成都不一样，这是正常的（盐不同）。</li><li>文件里是哈希不是明文，但仍然建议 <code>chmod 600 htpasswd</code>，不要提交到 git。</li><li>Basic Auth 的密码在 HTTP 下是明文传输的，只适合内网；要暴露到公网，请套一层 HTTPS。</li><li>改完密码文件后让 nginx 重新加载：<code>docker compose restart nginx-dsh</code>。</li></ul><h2 id=七启动>七、启动</h2><p>在存放 <code>compose.yml</code> 的目录执行：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>sudo docker compose up -d
+</span></span></code></pre></td></tr></table></div></div><p>看状态和日志：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>sudo docker compose ps
+</span></span><span class=line><span class=cl>sudo docker compose logs deepseek-harness
+</span></span></code></pre></td></tr></table></div></div><p><strong>这时候还不算成功。</strong> DSH 默认只监听 <code>127.0.0.1</code>，所以通过 <code>http://服务器IP:30800</code> 是打不开的。需要多做一步：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl><span class=c1># 先停止容器</span>
+</span></span><span class=line><span class=cl>docker compose stop
+</span></span></code></pre></td></tr></table></div></div><p>然后修改容器里的 <code>/root/.dsh/profiles/web/cordis.patch.yml</code>，也就是宿主机上的 <code>./dsh/profiles/web/cordis.patch.yml</code>，把 <code>host</code> 字段从 <code>"127.0.0.1"</code> 改成容器的 IP <code>172.24.0.10</code>：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-yaml data-lang=yaml><span class=line><span class=cl><span class=nt>host</span><span class=p>:</span><span class=w> </span><span class=s2>&#34;172.24.0.10&#34;</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p><strong>不要改成 <code>"0.0.0.0"</code>。</strong> DSH 会对请求的 Host / Origin 做白名单校验，<code>0.0.0.0</code> 不是合法的 Host 值，匹配不上；写成容器 IP 才能和 nginx 转发时带的 <code>Host</code>/<code>Origin</code> 对上。</p><p>改完再启动：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>docker compose start
+</span></span></code></pre></td></tr></table></div></div><p>这里用 <code>start</code> 而不是 <code>up -d</code>，是因为容器已经创建好了，<code>start</code> 只是把它重新跑起来。如果你执行过 <code>docker compose down</code>（删除了容器），那就要重新 <code>docker compose up -d</code>。</p><p>浏览器打开 <code>http://服务器IP:30800</code>，输入刚才设置的账号密码，就能看到 DSH 的 Web 界面了。</p><h2 id=八以后更新版本>八、以后更新版本</h2><p>流程不复杂：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl><span class=c1># 1. 删除现有容器</span>
+</span></span><span class=line><span class=cl>docker compose down
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 2. 更新源码</span>
+</span></span><span class=line><span class=cl><span class=nb>cd</span> deepseek-harness
+</span></span><span class=line><span class=cl>git pull
+</span></span><span class=line><span class=cl><span class=nb>cd</span> ..
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 3. 用新版本号重新构建</span>
+</span></span><span class=line><span class=cl>sudo docker build -t deepseek-harness:1.1.2 .
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 4. 改 compose 里的镜像 tag</span>
+</span></span><span class=line><span class=cl><span class=c1>#    image: &#39;deepseek-harness:1.1.1&#39;  -&gt;  image: &#39;deepseek-harness:1.1.2&#39;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 5. 重新创建容器</span>
+</span></span><span class=line><span class=cl>docker compose up -d
+</span></span></code></pre></td></tr></table></div></div><p><code>down</code> 只删容器和网络，挂载目录 <code>./dsh</code> 里的数据不受影响。</p><h2 id=九额外建议给宿主机做只读审计挂载>九、额外建议：给宿主机做只读审计挂载</h2><p>可以顺手把宿主机的一些配置目录以<strong>只读</strong>方式挂进容器，以后让 agent 帮忙审计或者排障会方便很多。注意一定要只读：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-yaml data-lang=yaml><span class=line><span class=cl><span class=w>    </span><span class=nt>volumes</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=c># 系统基本信息</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>/etc/os-release:/aa-mount/host/etc/os-release:ro</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>/etc/debian_version:/aa-mount/host/etc/debian_version:ro</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>/etc/passwd:/aa-mount/host/etc/passwd:ro</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>/etc/group:/aa-mount/host/etc/group:ro</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>/etc/hostname:/aa-mount/host/etc/hostname:ro</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>/etc/hosts:/aa-mount/host/etc/hosts:ro</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>/etc/fstab:/aa-mount/host/etc/fstab:ro</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=c># 内核参数配置</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>/etc/sysctl.d:/aa-mount/host/etc/sysctl.d:ro</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>/usr/lib/sysctl.d:/aa-mount/host/usr/lib/sysctl.d:ro</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=c># systemd 服务配置</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>/etc/systemd/system:/aa-mount/host/etc/systemd/system:ro</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>/usr/lib/systemd/system:/aa-mount/host/usr/lib/systemd/system:ro</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=c># 定时任务</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>/etc/crontab:/aa-mount/host/etc/crontab:ro</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>/etc/cron.d:/aa-mount/host/etc/cron.d:ro</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>/etc/cron.daily:/aa-mount/host/etc/cron.daily:ro</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>/etc/cron.hourly:/aa-mount/host/etc/cron.hourly:ro</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>/etc/cron.weekly:/aa-mount/host/etc/cron.weekly:ro</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>/etc/cron.monthly:/aa-mount/host/etc/cron.monthly:ro</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=c># SSH 配置（不挂载私钥）</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>/etc/ssh/sshd_config:/aa-mount/host/etc/ssh/sshd_config:ro</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>/etc/ssh/sshd_config.d:/aa-mount/host/etc/ssh/sshd_config.d:ro</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=c># 软件包与 APT 配置</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>/var/lib/dpkg/status:/aa-mount/host/var/lib/dpkg/status:ro</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>/etc/apt:/aa-mount/host/etc/apt:ro</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>/var/log/dpkg.log:/aa-mount/host/var/log/dpkg.log:ro</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>/var/log/apt:/aa-mount/host/var/log/apt:ro</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=c># 系统日志</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span>- <span class=l>/var/log/journal:/aa-mount/host/var/log/journal:ro</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>几点必须说清楚：</p><ul><li>宿主机侧的目录必须存在，容器里不存在的目录会自动创建。</li><li><strong>千万不要图省事写 <code>/:/aa-mount/host:ro</code></strong>。这等于把宿主机整个根目录挂进去，哪怕是只读的也不行——宿主机里有 <code>/var/run/docker.sock</code> 这类非普通文件，它们能接收指令，只读挂载挡不住“通过它下命令”。</li><li>同理，<code>docker.sock</code> 不要挂进容器，那等于把 docker 的控制权交出去。</li></ul><h2 id=十几个注意事项>十、几个注意事项</h2><ul><li><strong>备份 <code>./dsh</code>。</strong> 会话、插件、配置都在里面，丢了就得重来。</li><li><strong>别把 3080 直接开到公网。</strong> DSH 本身没有登录鉴权，暴露出去等于把服务器交给别人。要么只在内网用，要么像上面这样套 nginx + Basic Auth，条件允许再加 HTTPS。</li><li><strong><code>restart: "no"</code> 不是长久之计</strong>，机器重启或容器崩溃都不会自愈，建议用 <code>unless-stopped</code>。</li><li><strong>核显权限。</strong> 直通 <code>/dev/dri</code> 后，容器里的用户要能访问这个设备，必要时在 compose 里加 <code>group_add</code>，把 <code>render</code>、<code>video</code> 组的 GID 加进去。</li><li><strong>定期清理磁盘。</strong> 镜像和构建缓存会越攒越多，隔段时间 <code>docker system df</code> 看看，<code>docker image prune</code>、<code>docker builder prune</code> 清一清。</li><li><strong>不要图省事加 <code>--privileged</code>。</strong> 需要什么设备就直通什么设备，最小权限比“全开”省心得多。</li></ul></section><footer class="article-meta article-footer"><section class=article-tags><a href=/blog/tags/docker/>Docker</a>
+<a href=/blog/tags/%E8%87%AA%E5%BB%BA%E6%9C%8D%E5%8A%A1/>自建服务</a>
+<a href=/blog/tags/deepseek/>DeepSeek</a></section></footer></article><aside><h2 class=section-title>相关文章</h2><div class=subsection-list><div class=article-list--tile><article class=has-image><a href=/blog/p/docker-notes/><div class=article-image><img alt="Featured image of post Docker 常用命令备忘" height=150 loading=lazy src=/blog/p/docker-notes/cover_hu_2962ac36749dc45.png srcset="/blog/p/docker-notes/cover_hu_2962ac36749dc45.png 1x, /blog/p/docker-notes/cover_hu_aec3ebf1b3e5eeef.png 2x" width=250></div><div class=article-details style="background:linear-gradient(0deg,#6591c680 0%,#395d9aC0 100%)"><h2 class=article-title>Docker 常用命令备忘</h2></div></a></article></div></div></aside><footer class=site-footer><section class=copyright>&copy;
+2026 路人的博客</section><section class=powerby>使用 <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a> 构建<br>主题 <b><a href=https://github.com/CaiJimmy/hugo-theme-stack target=_blank rel=noopener data-version=4.0.3>Stack</a></b> 由 <a href=https://jimmycai.com target=_blank rel=noopener>Jimmy</a> 设计</section></footer><script type=module>
+    import gallery from '\/blog\/ts\/gallery.js';
+
+    const articleContent = document.querySelector('.article-content');
+    const shouldLoad = articleContent && (articleContent.querySelectorAll('figure').length > 0 || articleContent.querySelectorAll('img.gallery-image').length > 0);
+    
+    if (shouldLoad) {
+        gallery(articleContent);
+
+        const PhotoSwipeLightbox = (await import("https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe-lightbox.esm.min.js")).default;
+        const styleHref = "https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe.css";
+
+        const styleTag = document.createElement('link');
+        styleTag.rel = 'stylesheet';
+        styleTag.href = styleHref;
+        document.head.appendChild(styleTag);
+
+        const lightbox = new PhotoSwipeLightbox({
+            gallerySelector: '.article-content',
+            childSelector: 'figure a.image-link',
+            pswpModule: () => import("https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe.esm.min.js")
+        });
+        lightbox.init();
+    }
+</script></main></div><script type=text/javascript src=/blog/ts/main.f856840516f7c2ad1769a8f5937e3d08d6cb386e2cd2dd025ae696e0ff207958.js defer></script></body></html>
